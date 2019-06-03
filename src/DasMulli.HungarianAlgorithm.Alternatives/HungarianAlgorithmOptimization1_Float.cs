@@ -14,6 +14,7 @@ namespace DasMulli
     /// https://github.com/chaowlert/algorithm/blob/master/Algorithms/HungarianAlgorithm.cs
     /// available under the MIT license
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     public static class HungarianAlgorithmOptimization1_Float
     {
         /// <summary>

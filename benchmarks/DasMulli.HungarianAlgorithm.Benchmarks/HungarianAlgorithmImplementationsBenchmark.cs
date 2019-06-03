@@ -32,9 +32,34 @@ namespace DasMulli.Benchmarks
         [Benchmark]
         public int[] FindAssignmentsOptimization2_Storage() =>
             HungarianAlgorithmOptimization2_Storage.FindAssignments(_costs);
+
         [Benchmark]
         public int[] FindAssignmentsOptimization3_AvxFindZero() =>
             HungarianAlgorithmOptimization3_AvxFindZero.FindAssignments(_costs);
+
+        [Benchmark]
+        public int[] FindAssignmentsOptimization4_AvxStep1() =>
+            HungarianAlgorithmOptimization4_AvxStep1.FindAssignments(_costs);
+
+        [Benchmark]
+        public int[] FindAssignmentsOptimization5_FindMethodsAvx() =>
+            HungarianAlgorithmOptimization5_AvxFindMethods.FindAssignments(_costs);
+
+        [Benchmark]
+        public int[] FindAssignmentsOptimization6_AvxClearPrimes() =>
+            HungarianAlgorithmOptimization6_AvxClearPrimes.FindAssignments(_costs);
+
+        [Benchmark]
+        public int[] FindAssignmentsOptimization7_AvxFindMinimum() =>
+            HungarianAlgorithmOptimization7_AvxFindMinimum.FindAssignments(_costs);
+
+        [Benchmark]
+        public int[] FindAssignmentsOptimization8_AvxStep4() =>
+            HungarianAlgorithmOptimization8_AvxStep4.FindAssignments(_costs);
+
+        [Benchmark]
+        public int[] FindAssignmentsOptimization9_AvxAgentStepsResult() =>
+            HungarianAlgorithmOptimization9_AvxAgentStepsResult.FindAssignments(_costs);
 
         [Benchmark]
         public int[] FindAssignments() => HungarianAlgorithm.FindAssignments(_costs);

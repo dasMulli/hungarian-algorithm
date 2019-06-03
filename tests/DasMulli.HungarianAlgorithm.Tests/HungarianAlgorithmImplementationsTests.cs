@@ -79,6 +79,12 @@ namespace DasMulli.Tests
                 yield return new Func<Matrix<double>, int[]>[] { HungarianAlgorithmOptimization1_Float.FindAssignments };
                 yield return new Func<Matrix<double>, int[]>[] { HungarianAlgorithmOptimization2_Storage.FindAssignments };
                 yield return new Func<Matrix<double>, int[]>[] { HungarianAlgorithmOptimization3_AvxFindZero.FindAssignments };
+                yield return new Func<Matrix<double>, int[]>[] { HungarianAlgorithmOptimization4_AvxStep1.FindAssignments };
+                yield return new Func<Matrix<double>, int[]>[] { HungarianAlgorithmOptimization5_AvxFindMethods.FindAssignments };
+                yield return new Func<Matrix<double>, int[]>[] { HungarianAlgorithmOptimization6_AvxClearPrimes.FindAssignments };
+                yield return new Func<Matrix<double>, int[]>[] { HungarianAlgorithmOptimization7_AvxFindMinimum.FindAssignments };
+                yield return new Func<Matrix<double>, int[]>[] { HungarianAlgorithmOptimization8_AvxStep4.FindAssignments };
+                yield return new Func<Matrix<double>, int[]>[] { HungarianAlgorithmOptimization9_AvxAgentStepsResult.FindAssignments };
             }
         }
 

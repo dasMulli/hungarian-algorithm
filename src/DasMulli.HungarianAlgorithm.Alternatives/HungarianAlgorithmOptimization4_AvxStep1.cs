@@ -11,6 +11,8 @@ using MathNet.Numerics.LinearAlgebra;
 namespace DasMulli
 {
     /// <summary>
+    /// Class HungarianAlgorithmOptimization2_Storage.
+    ///
     /// Implements an assignment algorithm optimizing the global assignment costs.
     /// See https://en.wikipedia.org/wiki/Hungarian_algorithm for an explanation of the algorithm used.
     ///
@@ -19,7 +21,7 @@ namespace DasMulli
     /// available under the MIT license
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public static unsafe class HungarianAlgorithm
+    public static unsafe class HungarianAlgorithmOptimization4_AvxStep1
     {
         /// <summary>
         /// Finds the assignments with the lowest global assignment cost.
@@ -128,7 +130,19 @@ namespace DasMulli
                 }
             }
 
-            var agentsTasks = BuildAgentsTasksResult();
+            var agentsTasks = new int[rows];
+
+            for (var row = 0; row < rows; row++)
+            {
+                for (var column = 0; column < columns; column++)
+                {
+                    if (masks[row, column] == 1)
+                    {
+                        agentsTasks[row] = column;
+                        break;
+                    }
+                }
+            }
 
             return agentsTasks;
 
@@ -262,67 +276,18 @@ namespace DasMulli
             {
                 var minValue = FindMinimum();
 
-                if (Avx2.IsSupported && rows >= Vector256<float>.Count)
-                {
-                    var minValueVector = Vector256.Create(minValue);
-
-                    var maxVectorOffset = rows - rows % Vector256<float>.Count;
-
-                    var rowsCoveredFloats = new float[maxVectorOffset];
-                    for (var row = 0; row < maxVectorOffset; row++)
-                    {
-                        rowsCoveredFloats[row] = rowsCovered[row] ? 1f : 0f;
-                    }
-
-                    fixed (float* rowsCoveredFloatsPtr = rowsCoveredFloats, storagePtr = costs.ColumnMajorBackingStore)
-                    {
-                        for (var column = 0; column < columns; column++)
-                        {
-                            var rowBasePtr = storagePtr + column * rows;
-                            var columnCoveredVector = Vector256.Create(colsCovered[column] ? 0f : -1f);
-                            for (var row = 0; row < maxVectorOffset; row += Vector256<float>.Count)
-                            {
-                                var rowsCoveredVector = Avx.LoadVector256(rowsCoveredFloatsPtr + row);
-                                var multipliers = Avx.Add(rowsCoveredVector, columnCoveredVector);
-                                var diff = Avx.Multiply(minValueVector, multipliers);
-                                var rowVector = Avx.LoadVector256(rowBasePtr + row);
-                                var updatedRow = Avx.Add(rowVector, diff);
-                                Avx.Store(rowBasePtr + row, updatedRow);
-                            }
-
-                            if (maxVectorOffset < rows)
-                            {
-                                for (var row = maxVectorOffset; row < rows; row++)
-                                {
-                                    if (rowsCovered[row])
-                                    {
-                                        costs[row, column] += minValue;
-                                    }
-
-                                    if (!colsCovered[column])
-                                    {
-                                        costs[row, column] -= minValue;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                else
+                for (var row = 0; row < rows; row++)
                 {
                     for (var column = 0; column < columns; column++)
                     {
-                        for (var row = 0; row < rows; row++)
+                        if (rowsCovered[row])
                         {
-                            if (rowsCovered[row])
-                            {
-                                costs[row, column] += minValue;
-                            }
+                            costs[row, column] += minValue;
+                        }
 
-                            if (!colsCovered[column])
-                            {
-                                costs[row, column] -= minValue;
-                            }
+                        if (!colsCovered[column])
+                        {
+                            costs[row, column] -= minValue;
                         }
                     }
                 }
@@ -355,45 +320,13 @@ namespace DasMulli
 
             void ClearPrimes()
             {
-                if (Avx2.IsSupported && rows >= Vector256<byte>.Count)
+                for (var row = 0; row < rows; row++)
                 {
-                    var storeLength = costs.ColumnMajorBackingStore.Length;
-                    var maxVectorOffset = storeLength - storeLength % Vector256<byte>.Count;
-
-                    var twoVector = Vector256.Create((byte)2);
-                    fixed (byte* maskStoragePtr = masks.ColumnMajorBackingStore)
+                    for (var column = 0; column < columns; column++)
                     {
-                        for (var i = 0; i < maxVectorOffset; i += Vector256<byte>.Count)
+                        if (masks[row, column] == 2)
                         {
-                            var slicePtr = maskStoragePtr + i;
-                            var sliceVector = Avx.LoadVector256(slicePtr);
-                            var comparison = Avx2.CompareEqual(sliceVector, twoVector);
-                            var modifiedRow = Avx2.AndNot(comparison, sliceVector);
-                            Avx.Store(slicePtr, modifiedRow);
-                        }
-                    }
-
-                    if (maxVectorOffset < rows)
-                    {
-                        for (var i = maxVectorOffset; i < storeLength; i++)
-                        {
-                            if (masks.ColumnMajorBackingStore[i] == 2)
-                            {
-                                masks.ColumnMajorBackingStore[i] = 0;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    for (var row = 0; row < rows; row++)
-                    {
-                        for (var column = 0; column < columns; column++)
-                        {
-                            if (masks[row, column] == 2)
-                            {
-                                masks[row, column] = 0;
-                            }
+                            masks[row, column] = 0;
                         }
                     }
                 }
@@ -405,168 +338,29 @@ namespace DasMulli
 
                 var minValue = float.MaxValue;
 
-                if (Avx2.IsSupported && rows >= Vector256<float>.Count)
+                for (var row = 0; row < rows; row++)
                 {
-                    var maxVectorOffset = rows - rows % Vector256<float>.Count;
-
-                    var minValueVector = Vector256.Create(minValue);
-
-                    var rowsCoveredMaxValues = new float[rows];
-                    for (var row = 0; row < rows; row++)
+                    for (var column = 0; column < columns; column++)
                     {
-                        rowsCoveredMaxValues[row] = rowsCovered[row] ? float.MaxValue : 0;
-                    }
-
-                    fixed (float* storagePtr = costs.ColumnMajorBackingStore)
-                    fixed (float* rowsCoveredMaxValuesPtr = rowsCoveredMaxValues)
-                    {
-                        for (var column = 0; column < columns; column++)
+                        if (!rowsCovered[row] && !colsCovered[column])
                         {
-                            if (colsCovered[column])
-                            {
-                                continue;
-                            }
-
-                            var rowBasePtr = storagePtr + column * rows;
-
-                            for (var row = 0; row < maxVectorOffset; row += Vector256<float>.Count)
-                            {
-                                var rowVector = Avx.LoadVector256(rowBasePtr + row);
-                                var coveredMaxValueVector = Avx.LoadVector256(rowsCoveredMaxValuesPtr + row);
-                                minValueVector = Avx.Min(Avx.Max(rowVector, coveredMaxValueVector), minValueVector);
-                            }
-                        }
-                    }
-
-                    var permutedMinValueVector = Avx.Permute2x128(minValueVector, minValueVector, 1);
-                    var min1 = Avx.Min(minValueVector, permutedMinValueVector);
-                    var permutedMin1 = Avx.Permute(min1, 0b01_00_11_10);
-                    var min2 = Avx.Min(min1, permutedMin1);
-                    var permutedMin2 = Avx.Permute(min2, 0b10_11_00_01);
-                    var min3 = Avx.Min(min2, permutedMin2);
-                    minValue = min3.ToScalar();
-
-                    if (maxVectorOffset < rows)
-                    {
-                        for (var column = 0; column < columns; column++)
-                        {
-                            if (colsCovered[column])
-                            {
-                                continue;
-                            }
-
-                            for (var row = maxVectorOffset; row < rows; row++)
-                            {
-                                if (!rowsCovered[row])
-                                {
-                                    minValue = UnsafeMin(minValue, costs[row, column]);
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    for (var row = 0; row < rows; row++)
-                    {
-                        for (var column = 0; column < columns; column++)
-                        {
-                            if (!rowsCovered[row] && !colsCovered[column])
-                            {
-                                minValue = Math.Min(minValue, costs[row, column]);
-                            }
+                            minValue = Math.Min(minValue, costs[row, column]);
                         }
                     }
                 }
 
                 return minValue;
             }
-
-            int[] BuildAgentsTasksResult()
-            {
-                var tasksResult = new int[rows];
-
-                if (Avx2.IsSupported && masks.ColumnMajorBackingStore.Length >= Vector256<byte>.Count)
-                {
-                    var masksMaxVectorIndex = masks.ColumnMajorBackingStore.Length -
-                                              masks.ColumnMajorBackingStore.Length % Vector256<byte>.Count;
-
-                    if (masksMaxVectorIndex > 0)
-                    {
-                        fixed (byte* masksStorePtr = masks.ColumnMajorBackingStore)
-                        {
-                            var ones = Vector256.Create((byte)1);
-                            for (var i = 0; i < masksMaxVectorIndex; i += Vector256<byte>.Count)
-                            {
-                                var masksVector = Avx.LoadVector256(masksStorePtr + i);
-                                var comparisonResult = Avx2.CompareEqual(masksVector, ones);
-                                var comparisonMask = (uint)Avx2.MoveMask(comparisonResult);
-
-                                if (comparisonMask == 0)
-                                {
-                                    continue;
-                                }
-
-                                var foundIndex = i;
-                                while (comparisonMask != 0)
-                                {
-                                    if ((comparisonMask & 1) == 1)
-                                    {
-                                        var column = foundIndex / rows;
-                                        var row = foundIndex % rows;
-                                        tasksResult[row] = column;
-                                    }
-
-                                    foundIndex++;
-                                    comparisonMask >>= 1;
-                                }
-                            }
-                        }
-                    }
-
-                    if (masksMaxVectorIndex < masks.ColumnMajorBackingStore.Length)
-                    {
-                        for (var i = masksMaxVectorIndex; i < masks.ColumnMajorBackingStore.Length; i++)
-                        {
-                            if (masks.ColumnMajorBackingStore[i] == 1)
-                            {
-                                var column = i / rows;
-                                var row = i % rows;
-                                tasksResult[row] = column;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    for (var column = 0; column < columns; column++)
-                    {
-                        for (var row = 0; row < rows; row++)
-                        {
-                            if (masks[row, column] == 1)
-                            {
-                                tasksResult[row] = column;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                return tasksResult;
-            }
         }
 
         private static int FindPrimeInRow(Storage<byte> masks, int row)
         {
-            var index = row;
-            for (var j = 0; j < masks.ColumnCount; j++)
+            for (var column = 0; column < masks.ColumnCount; column++)
             {
-                if (masks.ColumnMajorBackingStore[index] == 2)
+                if (masks[row, column] == 2)
                 {
-                    return j;
+                    return column;
                 }
-
-                index += masks.RowCount;
             }
 
             return -1;
@@ -574,15 +368,12 @@ namespace DasMulli
 
         private static int FindStarInRow(Storage<byte> masks, int row)
         {
-            var index = row;
-            for (var j = 0; j < masks.ColumnCount; j++)
+            for (var column = 0; column < masks.ColumnCount; column++)
             {
-                if (masks.ColumnMajorBackingStore[index] == 1)
+                if (masks[row, column] == 1)
                 {
-                    return j;
+                    return column;
                 }
-
-                index += masks.RowCount;
             }
 
             return -1;
@@ -590,50 +381,11 @@ namespace DasMulli
 
         private static int FindStarInColumn(Storage<byte> masks, int column)
         {
-            if (Avx2.IsSupported && masks.RowCount >= Vector256<byte>.Count)
+            for (var row = 0; row < masks.RowCount; row++)
             {
-                var rowCount = masks.RowCount;
-                var maxVectorOffset = rowCount - rowCount % Vector256<byte>.Count;
-
-                fixed (byte* storagePtr = masks.ColumnMajorBackingStore)
+                if (masks[row, column] == 1)
                 {
-                    var rowBasePtr = storagePtr + column * rowCount;
-                    var ones = Vector256.Create((byte)1);
-                    for (var row = 0; row < maxVectorOffset; row += Vector256<byte>.Count)
-                    {
-                        var masksVector = Avx.LoadVector256(rowBasePtr + row);
-                        var comparisonResult = Avx2.CompareEqual(masksVector, ones);
-                        var comparisonMask = (uint)Avx2.MoveMask(comparisonResult);
-
-                        if (comparisonMask != 0)
-                        {
-                            row += (int)Bmi1.TrailingZeroCount(comparisonMask);
-                            return row;
-                        }
-                    }
-
-                    if (maxVectorOffset < rowCount)
-                    {
-                        rowBasePtr += maxVectorOffset;
-                        for (var row = maxVectorOffset; row < rowCount; row++)
-                        {
-                            if (*rowBasePtr == 1)
-                            {
-                                return row;
-                            }
-                            rowBasePtr++;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                for (var row = 0; row < masks.RowCount; row++)
-                {
-                    if (masks[row, column] == 1)
-                    {
-                        return row;
-                    }
+                    return row;
                 }
             }
 
@@ -736,9 +488,6 @@ namespace DasMulli
             return false;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float UnsafeMin(float left, float right) => left <= right ? left : right;
-
         private struct Location
         {
             public readonly int Row;
@@ -750,7 +499,6 @@ namespace DasMulli
                 Column = col;
             }
         }
-
         private struct Storage<T> where T : struct
         {
             public readonly int RowCount;

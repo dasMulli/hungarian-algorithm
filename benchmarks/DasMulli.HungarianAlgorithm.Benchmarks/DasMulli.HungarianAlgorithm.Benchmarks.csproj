@@ -4,6 +4,8 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>DasMulli.Benchmarks</RootNamespace>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <LangVersion>Preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

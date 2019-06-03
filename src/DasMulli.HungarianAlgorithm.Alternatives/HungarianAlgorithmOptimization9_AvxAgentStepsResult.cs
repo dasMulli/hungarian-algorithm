@@ -11,6 +11,8 @@ using MathNet.Numerics.LinearAlgebra;
 namespace DasMulli
 {
     /// <summary>
+    /// Class HungarianAlgorithmOptimization2_Storage.
+    ///
     /// Implements an assignment algorithm optimizing the global assignment costs.
     /// See https://en.wikipedia.org/wiki/Hungarian_algorithm for an explanation of the algorithm used.
     ///
@@ -19,7 +21,7 @@ namespace DasMulli
     /// available under the MIT license
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public static unsafe class HungarianAlgorithm
+    public static unsafe class HungarianAlgorithmOptimization9_AvxAgentStepsResult
     {
         /// <summary>
         /// Finds the assignments with the lowest global assignment cost.
@@ -44,7 +46,7 @@ namespace DasMulli
                 throw new ArgumentException("This algorithm implementation does not support cost matrices with fewer columns than rows", nameof(assignmentCostsDoubles));
             }
 
-            var costs = new Storage<float>(rows, columns);
+            var costs = new Storage<float> (rows, columns);
 
             for (var row = 0; row < rows; row++)
             {
@@ -735,7 +737,7 @@ namespace DasMulli
             zeroLocation = new Location(-1, -1);
             return false;
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float UnsafeMin(float left, float right) => left <= right ? left : right;
 

@@ -18,6 +18,7 @@ namespace DasMulli
     /// https://github.com/chaowlert/algorithm/blob/master/Algorithms/HungarianAlgorithm.cs
     /// available under the MIT license
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     public static class HungarianAlgorithmOptimization3_AvxFindZero
     {
         /// <summary>
@@ -361,62 +362,81 @@ namespace DasMulli
                 throw new ArgumentNullException(nameof(colsCovered));
             }
 
-            var rowCount = costs.RowCount;
-            var columnCount = costs.ColumnCount;
-            var maxVectorOffset = rowCount - rowCount % Vector256<float>.Count;
-            var storage = costs.ColumnMajorBackingStore;
-            var zeroVector = Vector256<float>.Zero;
-
-            var coveredMasks = new int[maxVectorOffset / Vector256<float>.Count];
-            for (int i = 0; i < maxVectorOffset; i += Vector256<float>.Count)
+            if (Avx2.IsSupported && costs.RowCount >= Vector256<float>.Count)
             {
-                coveredMasks[i / Vector256<float>.Count] = (rowsCovered[i] ? 0 : 1)
-                                  | (rowsCovered[i + 1] ? 0 : 2)
-                                  | (rowsCovered[i + 2] ? 0 : 4)
-                                  | (rowsCovered[i + 3] ? 0 : 8)
-                                  | (rowsCovered[i + 4] ? 0 : 16)
-                                  | (rowsCovered[i + 5] ? 0 : 32)
-                                  | (rowsCovered[i + 6] ? 0 : 64)
-                                  | (rowsCovered[i + 7] ? 0 : 128);
-            }
+                var rowCount = costs.RowCount;
+                var columnCount = costs.ColumnCount;
+                var storage = costs.ColumnMajorBackingStore;
+                var maxVectorOffset = rowCount - rowCount % Vector256<float>.Count;
+                var zeroVector = Vector256<float>.Zero;
 
-            fixed (float* storagePtr = storage)
-            {
-                for (var column = 0; column < columnCount; column++)
+                var coveredMasks = new int[maxVectorOffset / Vector256<float>.Count];
+                for (var i = 0; i < maxVectorOffset; i += Vector256<float>.Count)
                 {
-                    if (!colsCovered[column])
+                    coveredMasks[i / Vector256<float>.Count] = (rowsCovered[i] ? 0 : 1)
+                                      | (rowsCovered[i + 1] ? 0 : 2)
+                                      | (rowsCovered[i + 2] ? 0 : 4)
+                                      | (rowsCovered[i + 3] ? 0 : 8)
+                                      | (rowsCovered[i + 4] ? 0 : 16)
+                                      | (rowsCovered[i + 5] ? 0 : 32)
+                                      | (rowsCovered[i + 6] ? 0 : 64)
+                                      | (rowsCovered[i + 7] ? 0 : 128);
+                }
+
+                fixed (float* storagePtr = storage)
+                {
+                    for (var column = 0; column < columnCount; column++)
                     {
-                        var basePtr = storagePtr + rowCount * column;
-                        for (int row = 0, rowBatchIndex = 0; row < maxVectorOffset; row += Vector256<float>.Count, rowBatchIndex++)
+                        if (!colsCovered[column])
                         {
-                            var rowVector = Avx.LoadVector256(basePtr + row);
-                            var comparisonResult = Avx.Compare(rowVector, zeroVector, FloatComparisonMode.OrderedLessThanOrEqualNonSignaling);
-                            var equality = (uint)Avx.MoveMask(comparisonResult);
-
-                            if (equality == 0)
+                            var basePtr = storagePtr + rowCount * column;
+                            for (int row = 0, rowBatchIndex = 0; row < maxVectorOffset; row += Vector256<float>.Count, rowBatchIndex++)
                             {
-                                continue;
-                            }
+                                var rowVector = Avx.LoadVector256(basePtr + row);
+                                var comparisonResult = Avx.Compare(rowVector, zeroVector, FloatComparisonMode.OrderedLessThanOrEqualNonSignaling);
+                                var equality = (uint)Avx.MoveMask(comparisonResult);
 
-                            equality &= (uint)coveredMasks[rowBatchIndex];
+                                if (equality == 0)
+                                {
+                                    continue;
+                                }
 
-                            if (equality == 0)
-                            {
-                                continue;
-                            }
+                                equality &= (uint)coveredMasks[rowBatchIndex];
 
-                            var zeroRow = row + (int)Bmi1.TrailingZeroCount(equality);
-                            zeroLocation = new Location(zeroRow, column);
-                            return true;
-                        }
+                                if (equality == 0)
+                                {
+                                    continue;
+                                }
 
-                        for (var i = maxVectorOffset; i < rowCount; i++)
-                        {
-                            if (!rowsCovered[i] && storage[column * rowCount + i] <= 0)
-                            {
-                                zeroLocation = new Location(i, column);
+                                var zeroRow = row + (int)Bmi1.TrailingZeroCount(equality);
+                                zeroLocation = new Location(zeroRow, column);
                                 return true;
                             }
+
+                            for (var i = maxVectorOffset; i < rowCount; i++)
+                            {
+                                if (!rowsCovered[i] && storage[column * rowCount + i] <= 0)
+                                {
+                                    zeroLocation = new Location(i, column);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (var column = 0; column < costs.ColumnCount; column++)
+                {
+                    if (colsCovered[column]) continue;
+
+                    for (var row = 0; row < costs.RowCount; row++)
+                    {
+                        if (!rowsCovered[row] && costs.ColumnMajorBackingStore[column * costs.RowCount + row] <= 0)
+                        {
+                            zeroLocation = new Location(row, column);
+                            return true;
                         }
                     }
                 }

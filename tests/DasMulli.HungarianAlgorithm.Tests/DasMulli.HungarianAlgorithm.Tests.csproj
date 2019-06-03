@@ -21,4 +21,8 @@
     <ProjectReference Include="..\..\src\DasMulli.HungarianAlgorithm\DasMulli.HungarianAlgorithm.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TestResults\" />
+  </ItemGroup>
+
 </Project>

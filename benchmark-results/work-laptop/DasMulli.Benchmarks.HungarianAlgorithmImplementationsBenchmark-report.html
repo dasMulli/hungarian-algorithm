@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>DasMulli.Benchmarks.HungarianAlgorithmImplementationsBenchmark-20190605-072924</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.11.5, OS=Windows 10.0.17763.529 (1809/October2018Update/Redstone5)
+Intel Core i5-8350U CPU 1.70GHz (Kaby Lake R), 1 CPU, 8 logical and 4 physical cores
+.NET Core SDK=3.0.100-preview5-011568
+  [Host]     : .NET Core 3.0.0-preview5-27626-15 (CoreCLR 4.6.27622.75, CoreFX 4.700.19.22408), 64bit RyuJIT
+  DefaultJob : .NET Core 3.0.0-preview5-27626-15 (CoreCLR 4.6.27622.75, CoreFX 4.700.19.22408), 64bit RyuJIT
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>                                    Method</th><th>CostSize</th><th>    Mean</th><th>  Error</th><th> StdDev</th><th>  Median</th><th>Ratio</th><th>RatioSD</th><th>Rank</th>
+</tr>
+</thead><tbody><tr><td>FindAssignmentsBase</td><td>50</td><td>1,492.8 us</td><td>10.278 us</td><td>9.614 us</td><td>1,494.6 us</td><td>1.00</td><td>0.00</td><td>8</td>
+</tr><tr><td>FindAssignmentsOptimization1_Float</td><td>50</td><td>1,523.8 us</td><td>11.731 us</td><td>10.973 us</td><td>1,519.4 us</td><td>1.02</td><td>0.01</td><td>9</td>
+</tr><tr><td>FindAssignmentsOptimization2_Storage</td><td>50</td><td>806.9 us</td><td>7.697 us</td><td>7.199 us</td><td>803.6 us</td><td>0.54</td><td>0.01</td><td>7</td>
+</tr><tr><td>FindAssignmentsOptimization3_AvxFindZero</td><td>50</td><td>724.4 us</td><td>3.929 us</td><td>3.675 us</td><td>723.5 us</td><td>0.49</td><td>0.00</td><td>6</td>
+</tr><tr><td>FindAssignmentsOptimization4_AvxStep1</td><td>50</td><td>653.6 us</td><td>6.517 us</td><td>6.096 us</td><td>650.7 us</td><td>0.44</td><td>0.01</td><td>5</td>
+</tr><tr><td>FindAssignmentsOptimization5_FindMethodsAvx</td><td>50</td><td>652.7 us</td><td>7.590 us</td><td>7.100 us</td><td>649.2 us</td><td>0.44</td><td>0.01</td><td>5</td>
+</tr><tr><td>FindAssignmentsOptimization6_AvxClearPrimes</td><td>50</td><td>607.0 us</td><td>5.598 us</td><td>4.674 us</td><td>606.3 us</td><td>0.41</td><td>0.00</td><td>4</td>
+</tr><tr><td>FindAssignmentsOptimization7_AvxFindMinimum</td><td>50</td><td>413.7 us</td><td>5.881 us</td><td>5.501 us</td><td>414.0 us</td><td>0.28</td><td>0.00</td><td>3</td>
+</tr><tr><td>FindAssignmentsOptimization8_AvxStep4</td><td>50</td><td>175.6 us</td><td>3.383 us</td><td>3.164 us</td><td>174.3 us</td><td>0.12</td><td>0.00</td><td>1</td>
+</tr><tr><td>FindAssignmentsOptimization9_AvxAgentStepsResult</td><td>50</td><td>179.7 us</td><td>1.471 us</td><td>1.228 us</td><td>179.4 us</td><td>0.12</td><td>0.00</td><td>2</td>
+</tr><tr><td>FindAssignments</td><td>50</td><td>180.2 us</td><td>1.357 us</td><td>1.270 us</td><td>179.8 us</td><td>0.12</td><td>0.00</td><td>2</td>
+</tr><tr><td>FindAssignmentsBase</td><td>100</td><td>19,109.2 us</td><td>162.803 us</td><td>152.286 us</td><td>19,145.8 us</td><td>1.00</td><td>0.00</td><td>9</td>
+</tr><tr><td>FindAssignmentsOptimization1_Float</td><td>100</td><td>22,001.7 us</td><td>431.731 us</td><td>697.165 us</td><td>22,186.8 us</td><td>1.14</td><td>0.05</td><td>10</td>
+</tr><tr><td>FindAssignmentsOptimization2_Storage</td><td>100</td><td>9,404.6 us</td><td>86.143 us</td><td>76.363 us</td><td>9,390.5 us</td><td>0.49</td><td>0.01</td><td>8</td>
+</tr><tr><td>FindAssignmentsOptimization3_AvxFindZero</td><td>100</td><td>7,775.3 us</td><td>40.642 us</td><td>33.938 us</td><td>7,772.4 us</td><td>0.41</td><td>0.00</td><td>7</td>
+</tr><tr><td>FindAssignmentsOptimization4_AvxStep1</td><td>100</td><td>7,180.9 us</td><td>47.794 us</td><td>44.707 us</td><td>7,171.6 us</td><td>0.38</td><td>0.00</td><td>6</td>
+</tr><tr><td>FindAssignmentsOptimization5_FindMethodsAvx</td><td>100</td><td>7,050.0 us</td><td>47.037 us</td><td>41.697 us</td><td>7,041.1 us</td><td>0.37</td><td>0.00</td><td>5</td>
+</tr><tr><td>FindAssignmentsOptimization6_AvxClearPrimes</td><td>100</td><td>6,807.9 us</td><td>47.840 us</td><td>42.409 us</td><td>6,795.6 us</td><td>0.36</td><td>0.00</td><td>4</td>
+</tr><tr><td>FindAssignmentsOptimization7_AvxFindMinimum</td><td>100</td><td>4,509.1 us</td><td>71.945 us</td><td>67.298 us</td><td>4,494.9 us</td><td>0.24</td><td>0.01</td><td>3</td>
+</tr><tr><td>FindAssignmentsOptimization8_AvxStep4</td><td>100</td><td>1,595.3 us</td><td>20.445 us</td><td>18.124 us</td><td>1,587.3 us</td><td>0.08</td><td>0.00</td><td>1</td>
+</tr><tr><td>FindAssignmentsOptimization9_AvxAgentStepsResult</td><td>100</td><td>1,704.0 us</td><td>79.423 us</td><td>125.974 us</td><td>1,636.9 us</td><td>0.09</td><td>0.01</td><td>2</td>
+</tr><tr><td>FindAssignments</td><td>100</td><td>1,589.4 us</td><td>13.284 us</td><td>12.426 us</td><td>1,589.6 us</td><td>0.08</td><td>0.00</td><td>1</td>
+</tr><tr><td>FindAssignmentsBase</td><td>250</td><td>326,026.5 us</td><td>3,297.128 us</td><td>3,084.136 us</td><td>325,763.3 us</td><td>1.00</td><td>0.00</td><td>10</td>
+</tr><tr><td>FindAssignmentsOptimization1_Float</td><td>250</td><td>315,734.5 us</td><td>3,512.710 us</td><td>3,285.791 us</td><td>314,739.0 us</td><td>0.97</td><td>0.01</td><td>9</td>
+</tr><tr><td>FindAssignmentsOptimization2_Storage</td><td>250</td><td>151,187.9 us</td><td>1,730.569 us</td><td>1,534.105 us</td><td>150,746.0 us</td><td>0.46</td><td>0.01</td><td>8</td>
+</tr><tr><td>FindAssignmentsOptimization3_AvxFindZero</td><td>250</td><td>108,928.7 us</td><td>755.524 us</td><td>630.897 us</td><td>109,040.4 us</td><td>0.33</td><td>0.00</td><td>7</td>
+</tr><tr><td>FindAssignmentsOptimization4_AvxStep1</td><td>250</td><td>100,605.9 us</td><td>1,131.241 us</td><td>1,058.164 us</td><td>100,508.8 us</td><td>0.31</td><td>0.01</td><td>5</td>
+</tr><tr><td>FindAssignmentsOptimization5_FindMethodsAvx</td><td>250</td><td>102,773.3 us</td><td>1,981.882 us</td><td>1,853.853 us</td><td>102,141.9 us</td><td>0.32</td><td>0.01</td><td>6</td>
+</tr><tr><td>FindAssignmentsOptimization6_AvxClearPrimes</td><td>250</td><td>93,460.1 us</td><td>1,794.150 us</td><td>1,762.095 us</td><td>92,803.9 us</td><td>0.29</td><td>0.01</td><td>4</td>
+</tr><tr><td>FindAssignmentsOptimization7_AvxFindMinimum</td><td>250</td><td>60,966.1 us</td><td>567.372 us</td><td>502.961 us</td><td>60,966.0 us</td><td>0.19</td><td>0.00</td><td>3</td>
+</tr><tr><td>FindAssignmentsOptimization8_AvxStep4</td><td>250</td><td>18,643.6 us</td><td>239.895 us</td><td>212.660 us</td><td>18,591.9 us</td><td>0.06</td><td>0.00</td><td>1</td>
+</tr><tr><td>FindAssignmentsOptimization9_AvxAgentStepsResult</td><td>250</td><td>19,061.2 us</td><td>306.630 us</td><td>286.822 us</td><td>18,992.4 us</td><td>0.06</td><td>0.00</td><td>2</td>
+</tr><tr><td>FindAssignments</td><td>250</td><td>18,550.8 us</td><td>106.020 us</td><td>93.984 us</td><td>18,519.5 us</td><td>0.06</td><td>0.00</td><td>1</td>
+</tr><tr><td>FindAssignmentsBase</td><td>500</td><td>3,308,073.8 us</td><td>22,104.293 us</td><td>19,594.880 us</td><td>3,311,534.0 us</td><td>1.00</td><td>0.00</td><td>9</td>
+</tr><tr><td>FindAssignmentsOptimization1_Float</td><td>500</td><td>3,130,570.6 us</td><td>22,147.230 us</td><td>20,716.533 us</td><td>3,131,983.0 us</td><td>0.95</td><td>0.01</td><td>8</td>
+</tr><tr><td>FindAssignmentsOptimization2_Storage</td><td>500</td><td>1,428,902.6 us</td><td>10,142.099 us</td><td>9,486.925 us</td><td>1,426,261.6 us</td><td>0.43</td><td>0.00</td><td>7</td>
+</tr><tr><td>FindAssignmentsOptimization3_AvxFindZero</td><td>500</td><td>967,689.8 us</td><td>8,114.364 us</td><td>7,590.181 us</td><td>968,881.3 us</td><td>0.29</td><td>0.00</td><td>6</td>
+</tr><tr><td>FindAssignmentsOptimization4_AvxStep1</td><td>500</td><td>895,594.5 us</td><td>10,342.442 us</td><td>9,168.306 us</td><td>895,572.6 us</td><td>0.27</td><td>0.00</td><td>5</td>
+</tr><tr><td>FindAssignmentsOptimization5_FindMethodsAvx</td><td>500</td><td>892,142.1 us</td><td>15,708.875 us</td><td>14,694.092 us</td><td>891,148.3 us</td><td>0.27</td><td>0.01</td><td>5</td>
+</tr><tr><td>FindAssignmentsOptimization6_AvxClearPrimes</td><td>500</td><td>838,870.2 us</td><td>9,463.338 us</td><td>7,902.316 us</td><td>835,034.4 us</td><td>0.25</td><td>0.00</td><td>4</td>
+</tr><tr><td>FindAssignmentsOptimization7_AvxFindMinimum</td><td>500</td><td>554,468.7 us</td><td>5,956.059 us</td><td>4,650.099 us</td><td>555,482.6 us</td><td>0.17</td><td>0.00</td><td>3</td>
+</tr><tr><td>FindAssignmentsOptimization8_AvxStep4</td><td>500</td><td>191,718.5 us</td><td>3,661.713 us</td><td>3,596.292 us</td><td>191,477.8 us</td><td>0.06</td><td>0.00</td><td>2</td>
+</tr><tr><td>FindAssignmentsOptimization9_AvxAgentStepsResult</td><td>500</td><td>163,874.5 us</td><td>1,266.007 us</td><td>1,057.173 us</td><td>164,026.9 us</td><td>0.05</td><td>0.00</td><td>1</td>
+</tr><tr><td>FindAssignments</td><td>500</td><td>161,458.2 us</td><td>1,913.247 us</td><td>1,597.648 us</td><td>161,294.8 us</td><td>0.05</td><td>0.00</td><td>1</td>
+</tr></tbody></table>
+</body>
+</html>
